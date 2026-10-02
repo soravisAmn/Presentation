@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-02",
+  "summaries": [
+    {
+      "topic": "FIG commissions (framework for dividing survey fields)",
+      "summary": "FIG organises its technical work into ten commissions. The technical ones relevant to survey technology are Spatial Information Management (3), Hydrography (4), Positioning and Measurement (5), Engineering Surveys (6) and Construction Economics and Management (10). The six-area grouping used in the first outline is a presentation choice and is not a published standard.",
+      "key_points": [
+        "Ten commissions in total (FIG commissions page)",
+        "Commission 5 working groups for 2023-2026 include GNSS, multi-sensor systems and emerging technologies for PNT",
+        "The 6-area split in the draft outline is the assistant's own grouping"
+      ],
+      "open_questions": [
+        "Organise the slides by FIG commission, or keep the technology-based grouping?",
+        "Confirm the textbook table of contents supports the same split"
+      ],
+      "source_refs": ["fig-comm", "fig-c5"]
+    }
+  ],
+  "sources": [
+    {
+      "ref": "fig-comm",
+      "topic": "FIG commissions",
+      "title": "FIG Commissions",
+      "type": "Org website",
+      "author": "FIG (International Federation of Surveyors)",
+      "url": "https://www.fig.net/organisation/comm/index.asp",
+      "location": "main page",
+      "key_info": "FIG's technical work is led by ten commissions.",
+      "reliability": "Verified - opened",
+      "search_keywords": "FIG commissions site:fig.net"
+    },
+    {
+      "ref": "fig-c5",
+      "topic": "FIG commissions",
+      "title": "FIG Commission 5 - Positioning and Measurement",
+      "type": "Org website",
+      "author": "FIG",
+      "url": "https://www.fig.net/organisation/comm/5/",
+      "location": "What we do (2023-2026 work plan)",
+      "key_info": "Working groups: standards/QA/calibration, 3D reference frames, vertical reference frames, GNSS, multi-sensor systems, cost-effective positioning, emerging technologies for PNT.",
+      "reliability": "Snippet only",
+      "search_keywords": "FIG Commission 5 positioning measurement working groups"
+    },
+    {
+      "ref": "memory-claim",
+      "topic": "Textbooks",
+      "title": "Elementary Surveying: An Introduction to Geomatics (Ghilani & Wolf)",
+      "type": "Book/PDF",
+      "author": "Ghilani & Wolf",
+      "location": "",
+      "key_info": "Standard textbook, cited from background knowledge only; table of contents not yet checked.",
+      "reliability": "From memory - verify",
+      "search_keywords": "Ghilani Wolf Elementary Surveying Introduction to Geomatics table of contents"
+    }
+  ],
+  "searches": [
+    {
+      "query": "FIG commissions site:fig.net",
+      "where": "Web search",
+      "result": "Found the commissions index and per-commission pages.",
+      "url": "https://www.fig.net/organisation/comm/index.asp"
+    },
+    {
+      "query": "FIG Commission 5 positioning measurement working groups",
+      "where": "Web search",
+      "result": "Returned the Commission 5 page with the 2023-2026 working groups."
+    }
+  ]
+}
