@@ -1,0 +1,173 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flow งานสไลด์สำรวจ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one vertical track of steps. Person steps are outlined, skill steps are filled with the accent. A loop rail on the right returns from the check step to the next draft. */
+:root{
+  --bg:#f6f7f5; --surface:#ffffff; --fg:#1f2a26; --muted:#5d6b64; --line:#c9d1cc;
+  --skill:#1d5c4a; --skill-fg:#ffffff; --person:#9a6b12; --person-bg:#fbf3e1;
+  --file:#eef2ef; --warn:#a63d2f; --warn-bg:#fbeceA;
+  --font:"Sarabun","TH Sarabun New",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --surface:#1c2420; --fg:#e6ece8; --muted:#9aa9a1; --line:#3a4640;
+  --skill:#4fb391; --skill-fg:#0f1d18; --person:#e0b25a; --person-bg:#2a2314;
+  --file:#232d28; --warn:#ee8a7a; --warn-bg:#2d1b18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --surface:#1c2420; --fg:#e6ece8; --muted:#9aa9a1; --line:#3a4640;
+  --skill:#4fb391; --skill-fg:#0f1d18; --person:#e0b25a; --person-bg:#2a2314;
+  --file:#232d28; --warn:#ee8a7a; --warn-bg:#2d1b18; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.55;
+  margin:0;padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:860px;margin-inline:auto}
+h1{font-size:30px;line-height:1.25;margin:0 0 6px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 22px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0 0 26px;font-size:15px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.sw{width:16px;height:16px;border-radius:4px;display:inline-block}
+.sw.p{border:2px solid var(--person);background:var(--person-bg)}
+.sw.s{background:var(--skill)}
+.sw.f{background:var(--file);border:1px solid var(--line)}
+.track{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 14px}
+.rail{display:flex;flex-direction:column;align-items:center}
+.num{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
+.step.skill .num{background:var(--skill);color:var(--skill-fg)}
+.step.person .num{border:2px solid var(--person);color:var(--person);background:var(--person-bg)}
+.line{flex:1;width:2px;background:var(--line);min-height:18px;margin-block:4px}
+.step:last-child .line{display:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px;min-width:0}
+.step.skill .card{border-left:4px solid var(--skill)}
+.step.person .card{border-left:4px solid var(--person)}
+.who{font-size:14px;color:var(--muted);margin:0 0 2px}
+.card h2{font-size:20px;margin:0 0 6px;line-height:1.3}
+.cmd{font-family:var(--mono);font-size:15px;background:var(--file);padding:2px 7px;border-radius:5px;overflow-wrap:anywhere}
+.io{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;margin:10px 0 0;font-size:15px}
+.io b{color:var(--muted);font-weight:500}
+.io code{font-family:var(--mono);font-size:13.5px;background:var(--file);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere;display:inline-block;margin:1px 0}
+.note{margin:10px 0 0;font-size:15px;padding:8px 11px;border-radius:7px;background:var(--warn-bg);color:var(--fg);border:1px solid var(--line)}
+.note b{color:var(--warn)}
+.opt{font-size:13px;font-weight:500;color:var(--person);border:1px solid var(--person);border-radius:20px;padding:0 8px;margin-left:8px;white-space:nowrap}
+.loop{margin:2px 0 26px 58px;padding:10px 14px;border:2px dashed var(--line);border-radius:10px;color:var(--muted);font-size:15.5px}
+h3{font-size:19px;margin:34px 0 10px}
+.tree{font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;white-space:pre;line-height:1.6;margin:0}
+.tree i{color:var(--muted);font-style:normal}
+ul.gaps{margin:0;padding-left:20px}
+ul.gaps li{margin-bottom:6px}
+@media (max-width:520px){body{font-size:16px}.step{grid-template-columns:36px minmax(0,1fr);gap:0 10px}.num{width:32px;height:32px}.loop{margin-left:0}.io{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+<h1>Flow งานสไลด์สำรวจ ต่อ 1 รอบ draft</h1>
+<p class="lead">ลำดับการใช้สกิลตั้งแต่จดไอเดียจนได้ไฟล์ PowerPoint ใช้ซ้ำได้ทุกรอบ แทน N ด้วยเลข draft ฐานอยู่ที่ <span class="cmd">D:\Yo\Presentation\Presentation\Surveying Technologies</span></p>
+
+<div class="legend">
+  <span><i class="sw p"></i>คุณทำเอง</span>
+  <span><i class="sw s"></i>เรียกสกิล</span>
+  <span><i class="sw f"></i>ไฟล์เข้า / ไฟล์ออก</span>
+</div>
+
+<div class="track">
+
+<div class="step person"><div class="rail"><div class="num">1</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">เตรียมโฟลเดอร์</p>
+  <h2>สร้าง <span class="cmd">draft#N</span> และวางไฟล์ตั้งต้น</h2>
+  <div class="io">
+    <b>วาง</b><span><code>draft#N\survey.md</code> <code>draft#N\formatted\1–12.md</code></span>
+    <b>ต้องมี</b><span>ทั้งสองอย่างก่อนเรียกสกิลถัดไป ถ้าไม่มี <code>survey.md</code> สกิลจะหยุดและแจ้งให้ทราบ</span>
+  </div>
+</div></div>
+
+<div class="step person"><div class="rail"><div class="num">2</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">จดไอเดีย</p>
+  <h2>เขียน <span class="cmd">draft#N\adjust.md</span></h2>
+  <div class="io">
+    <b>หัวบท</b><span><code>## N.</code> ตามเลขบท แล้วเขียนไอเดียใต้หัวบท</span>
+    <b>"..."</b><span>ข้อความที่ให้ใส่ตามถ้อยคำเดิม</span>
+    <b>*...*</b><span>ให้เกลาเป็นภาษาทางการก่อนใส่</span>
+    <b>ไม่มีเครื่องหมาย</b><span>คือคำสั่ง เช่น ย้าย สลับ ลบ เปลี่ยนชื่อหัวข้อ เพิ่มคำอธิบาย</span>
+  </div>
+</div></div>
+
+<div class="step skill"><div class="rail"><div class="num">3</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">สกิลที่ 1</p>
+  <h2><span class="cmd">/adjust-formatted-notes</span></h2>
+  <div class="io">
+    <b>เข้า</b><span><code>draft#N\adjust.md</code> <code>draft#N\formatted\*.md</code></span>
+    <b>ทำ</b><span>อ่านไอเดีย สำรองไฟล์ที่จะแก้ สรุปการตีความให้คุณดู ถามเฉพาะข้อที่คลุมเครือ แล้วแก้ไฟล์รายบท</span>
+    <b>ออก</b><span><code>draft#N\formatted\*.md</code> (ฉบับแก้แล้ว) <code>draft#N\สำรอง\*.md</code> (ฉบับก่อนแก้)</span>
+  </div>
+  <p class="note"><b>จุดที่ต้องตัดสินใจ</b> คำสั่งที่ให้เขียนเนื้อหาใหม่ (อธิบายเพิ่ม ทำตาราง ดูลิงก์) สกิลเดิมไม่อนุญาต รอบ draft#3 ตกลงให้เขียนได้แต่ต้องติดป้าย [เพิ่มโดย Claude · …] ถ้าจะใช้เป็นกติกาถาวร ต้องแก้ข้อความในสกิล</p>
+</div></div>
+
+<div class="step person"><div class="rail"><div class="num">4</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">ตรวจด้วยมือ <span class="opt">ทำเมื่อจำเป็น</span></p>
+  <h2>อ่านไฟล์ <span class="cmd">formatted</span> ที่แก้แล้ว</h2>
+  <div class="io">
+    <b>ตรวจ</b><span>ป้าย "ความรู้ทั่วไป ยังไม่มีแหล่งอ้างอิง", ตัวเลขที่ยังไม่ตรวจแหล่ง, ช่องว่างที่ต้องเติม</span>
+    <b>แหล่ง</b><span>โฟลเดอร์ <code>txt\1–12\</code> (links.txt และ PDF)</span>
+    <b>แก้</b><span>แก้ไฟล์ <code>formatted</code> ตรงๆ หรือเขียนไอเดียเพิ่มใน <code>adjust.md</code> แล้วย้อนไปขั้น 3</span>
+  </div>
+</div></div>
+
+<div class="step skill"><div class="rail"><div class="num">5</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">สกิลที่ 2</p>
+  <h2><span class="cmd">/merge-formatted-into-survey-md</span></h2>
+  <div class="io">
+    <b>เข้า</b><span><code>draft#N\survey.md</code> (ฐาน) <code>draft#N\formatted\*.md</code></span>
+    <b>ทำ</b><span>เทียบรายบท แทนที่เฉพาะบทที่ต่างกัน บทที่เหมือนเดิมไม่แตะ</span>
+    <b>ออก</b><span><code>draft#N\survey.md</code> (ทับไฟล์เดิม) แจ้งเฉพาะว่าบทไหนถูกแทนที่</span>
+  </div>
+  <p class="note"><b>สกิลจะหยุดถามเมื่อ</b> บทที่จะถูกแทนที่มีข้อความที่ไม่อยู่ใน <code>formatted</code> (เช่นคุณเคยแก้ใน <code>survey.md</code> ด้วยมือ) หรือหาไฟล์คู่ของบทไม่เจอ รอบ draft#3 บท 9 เข้ากรณีนี้ เพราะไฟล์ <code>formatted</code> ไม่มีหัวบท <code>## 9.</code></p>
+</div></div>
+
+<div class="step skill"><div class="rail"><div class="num">6</div><div class="line"></div></div>
+<div class="card">
+  <p class="who">สกิลที่ 3</p>
+  <h2><span class="cmd">/survey-slides-builder</span></h2>
+  <div class="io">
+    <b>เข้า</b><span><code>draft#N\survey.md</code> เท่านั้น ห้ามใช้ไฟล์ร่างเก่าหรือ <code>formatted</code></span>
+    <b>กติกา</b><span>หัวข้อสไลด์ใช้หัวข้อใน survey.md ตรงตัว, คัดบรรทัดตรงตัวไม่เรียบเรียงใหม่, ตัวเลขที่ยังไม่ตรวจไปอยู่ในโน้ตผู้บรรยาย, ฟอนต์ TH Sarabun New</span>
+    <b>ออก</b><span><code>draft#N\draftN.pptx</code> และ <code>draft#N\ข้อเสนอแนะ.md</code></span>
+  </div>
+  <p class="note"><b>ก่อนเรียก</b> สกิลที่ลงทะเบียนในระบบยังเป็นฉบับเก่า (บอกให้อ่าน <code>txt\survey.md</code> และให้หัวข้อเป็นประโยคบอกสาระ) ฉบับที่คุณแก้อยู่ที่ <code>txt\skills\survey-slides-builder</code> ควรบันทึกฉบับใหม่ผ่านการ์ดก่อน</p>
+</div></div>
+
+<div class="step person"><div class="rail"><div class="num">7</div></div>
+<div class="card">
+  <p class="who">ตรวจผลงาน</p>
+  <h2>เปิด <span class="cmd">draftN.pptx</span> ในเครื่องที่มี TH Sarabun New</h2>
+  <div class="io">
+    <b>ดู</b><span>ตัวอักษรล้นหรือเล็กเกินไป, สไลด์ "(ต่อ)", ตาราง, ข้อเสนอแนะใน <code>ข้อเสนอแนะ.md</code></span>
+    <b>ถัดไป</b><span>ตัดสินใจรอบถัดไป แล้วสร้าง <code>draft#N+1</code> ตามขั้น 1</span>
+  </div>
+</div></div>
+
+</div>
+
+<div class="loop">วนรอบ: ถ้าอยากแก้เนื้อหา ให้เพิ่มไอเดียใน <b>adjust.md</b> ของ <b>draft#N+1</b> แล้วเริ่มที่ขั้น 3 ใหม่ ไฟล์ <b>survey.md</b> ของแต่ละ draft เก็บไว้ในโฟลเดอร์ของรอบนั้น จึงย้อนดูได้ว่าสไลด์แต่ละรอบใช้ข้อมูลอะไร</div>
+
+<h3>โครงโฟลเดอร์ของ 1 รอบ</h3>
+<pre class="tree">draft#N\
+  survey.md              <i>ฐานข้อมูลของรอบนี้ (ขั้น 1, ถูกทับในขั้น 5)</i>
+  adjust.md              <i>ไอเดียของคุณ (ขั้น 2)</i>
+  formatted\             <i>ไฟล์รายบท (ขั้น 1, แก้ในขั้น 3)</i>
+    1. ….md  …  12. ….md
+  สำรอง\                 <i>ไฟล์ก่อนแก้ (สร้างในขั้น 3)</i>
+  draftN.pptx            <i>ผลลัพธ์ (ขั้น 6)</i>
+  ข้อเสนอแนะ.md          <i>ข้อเสนอและจุดที่ต้องตรวจ (ขั้น 6)</i></pre>
+
+<h3>ช่องว่างที่ยังไม่ปิด</h3>
+<ul class="gaps">
+  <li>ส่วนจัดรูปแบบข้อความดิบเป็นไฟล์ <code>formatted</code> (สกิล <code>lossless-note-formatting</code>) และการสร้าง <code>survey.md</code> ครั้งแรก อยู่ก่อนขั้น 1 ไม่ได้รวมในแผนภาพนี้</li>
+  <li>วิธีจัดการคำสั่งคลุมเครือใน <code>adjust.md</code> คุณยังไม่ได้ตัดสินใจ ตอนนี้สกิลถามเป็นข้อๆ</li>
+  <li>แม่แบบสีองค์กรและที่มาของรูปภาพ ยังไม่ระบุ สไลด์เป็นพื้นขาวตัวอักษรดำ</li>
+</ul>
+</div>
+
+</body></html>
